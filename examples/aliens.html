@@ -34,17 +34,15 @@
             display: block;
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.26.0a1/full/pyodide.js"></script>
+    <script src="https://ryanking13.github.io/pyodide-pygame-demo/dist/pyodide.js"></script>
 </head>
 <body>
 
     <script type="text/javascript">
-        const curloc = document.location.href;
-        const curdir = curloc.substring(0, curloc.lastIndexOf('/'));
-  
         async function main(){
-          let pyodide = await loadPyodide();
-          await pyodide.loadPackage(`${curdir}/pygame_ce-2.4.0-cp312-cp312-emscripten_3_1_52_wasm32.whl`)
+          let pyodide = await loadPyodide({
+            packages: ["pygame-ce"],
+          });
 
           canvas = document.getElementById("canvas");
           pyodide.canvas.setCanvas2D(canvas);
@@ -452,7 +450,7 @@ main()
       </script>
 
 <div class="demo">
-    <div class="demo-header">Stars</div>
+    <div class="demo-header">pygame.examples.aliens</div>
     <div class="demo-content">
         <canvas id="canvas"></canvas>
     </div>
