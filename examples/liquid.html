@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Stars</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .demo {
+            background-color: #fff;
+            margin: 20px auto;
+            max-width: 1000px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .demo-header {
+            background-color: #007bff;
+            color: #fff;
+            padding: 15px 20px;
+            font-size: 20px;
+        }
+        .demo-content {
+            padding: 20px;
+        }
+
+        #canvas {
+            margin: 0 auto;
+            display: block;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.26.0a1/full/pyodide.js"></script>
+</head>
+<body>
+
+    <script type="text/javascript">
+        const curloc = document.location.href;
+        const curdir = curloc.substring(0, curloc.lastIndexOf('/'));
+  
+        async function main(){
+          let pyodide = await loadPyodide();
+          await pyodide.loadPackage(`${curdir}/pygame_ce-2.4.0-cp312-cp312-emscripten_3_1_52_wasm32.whl`)
+
+          canvas = document.getElementById("canvas");
+          pyodide.canvas.setCanvas2D(canvas);
+          
+          pyodide.runPythonAsync(`
+          #!/usr/bin/env python
+""" pygame.examples.liquid
+
+This example demonstrates a simplish water effect of an
+image. It attempts to create a hardware display surface that
+can use pageflipping for faster updates. Note that the colormap
+from the loaded GIF image is copied to the colormap for the
+display surface.
+
+This is based on the demo named F2KWarp by Brad Graham of Freedom2000
+done in BlitzBasic. I was just translating the BlitzBasic code to
+pygame to compare the results. I didn't bother porting the text and
+sound stuff, that's an easy enough challenge for the reader :]
+"""
+
+import asyncio
+import pygame
+import os
+from math import sin
+import time
+import pathlib
+
+main_dir = str(pathlib.Path(pygame.__file__).parent / "examples")
+
+
+async def main():
+    # initialize and setup screen
+    pygame.init()
+    screen = pygame.display.set_mode((640, 480), pygame.DOUBLEBUF)
+
+    # load image and quadruple
+    imagename = os.path.join(main_dir, "data", "liquid.bmp")
+    bitmap = pygame.image.load(imagename)
+    bitmap = pygame.transform.scale2x(bitmap)
+    bitmap = pygame.transform.scale2x(bitmap)
+
+    # get the image and screen in the same format
+    if screen.get_bitsize() == 8:
+        screen.set_palette(bitmap.get_palette())
+    else:
+        bitmap = bitmap.convert()
+
+    # prep some variables
+    anim = 0.0
+
+    # mainloop
+    xblocks = range(0, 640, 20)
+    yblocks = range(0, 480, 20)
+    stopevents = pygame.QUIT, pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN
+    while True:
+        for e in pygame.event.get():
+            if e.type in stopevents:
+                return
+
+        anim = anim + 0.02
+        for x in xblocks:
+            xpos = (x + (sin(anim + x * 0.01) * 15)) + 20
+            for y in yblocks:
+                ypos = (y + (sin(anim + y * 0.01) * 15)) + 20
+                screen.blit(bitmap, (x, y), (xpos, ypos, 20, 20))
+
+        pygame.display.flip()
+        await asyncio.sleep(0.01)
+
+
+main()
+  `)
+        }
+  
+        main()
+      </script>
+
+<div class="demo">
+    <div class="demo-header">Stars</div>
+    <div class="demo-content">
+        <canvas id="canvas"></canvas>
+    </div>
+</div>
+
+</body>
+</html>
