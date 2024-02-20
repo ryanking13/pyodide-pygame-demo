@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pyodide Pygame Example</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .demo {
+            background-color: #fff;
+            margin: 20px auto;
+            max-width: 1000px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .demo-header {
+            background-color: #007bff;
+            color: #fff;
+            padding: 15px 20px;
+            font-size: 20px;
+        }
+        .demo-content {
+            padding: 20px;
+        }
+
+        #canvas {
+            margin: 0 auto;
+            display: block;
+        }
+    </style>
+    <script src="https://ryanking13.github.io/pyodide-pygame-demo/dist/pyodide.js"></script>
+</head>
+<body>
+
+    <script type="text/javascript">
+        const curloc = document.location.href;
+        const curdir = curloc.substring(0, curloc.lastIndexOf('/'));
+  
+        async function main(){
+          let pyodide = await loadPyodide();
+          await pyodide.loadPackage(["pygame-ce", "numpy"], { checkIntegrity: false })
+          canvas = document.getElementById("canvas");
+          pyodide.canvas.setCanvas2D(canvas);
+          
+          pyodide.runPythonAsync(`
+import asyncio
+import os
+import pygame
+
+try:
+    import numpy as np
+    import numpy.random as np_random
+except ImportError:
+    raise SystemExit("This example requires numpy and the pygame surfarray module")
+
+timer = 0
+
+
+def stopwatch(message=None):
+    """simple routine to time python code"""
+    global timer
+    if not message:
+        timer = pygame.time.get_ticks()
+        return
+    now = pygame.time.get_ticks()
+    runtime = (now - timer) / 1000.0 + 0.001
+    print(f"{message} {runtime} seconds\t{(1.0 / runtime):.2f}fps")
+    timer = now
+
+
+def vert_gradient_column(surf, topcolor, bottomcolor):
+    """creates a new 3d vertical gradient array"""
+    topcolor = np.array(topcolor, copy=False)
+    bottomcolor = np.array(bottomcolor, copy=False)
+    diff = bottomcolor - topcolor
+    width, height = surf.get_size()
+    # create array from 0.0 to 1.0 triplets
+    column = np.arange(height, dtype="float") / height
+    column = np.repeat(column[:, np.newaxis], [3], 1)
+    # create a single column of gradient
+    column = topcolor + (diff * column).astype("int")
+    # make the column a 3d image column by adding X
+    column = column.astype("uint8")[np.newaxis, :, :]
+    # 3d array into 2d array
+    return pygame.surfarray.map_array(surf, column)
+
+
+def display_gradient(surf):
+    """choose random colors and show them"""
+    stopwatch()
+    colors = np_random.randint(0, 255, (2, 3))
+    column = vert_gradient_column(surf, colors[0], colors[1])
+    pygame.surfarray.blit_array(surf, column)
+    pygame.display.flip()
+    stopwatch("Gradient:")
+
+
+async def main():
+    pygame.init()
+    pygame.mixer.quit()  # remove ALSA underflow messages for Debian squeeze
+    size = 600, 400
+    os.environ["SDL_VIDEO_CENTERED"] = "1"
+    screen = pygame.display.set_mode(size, pygame.NOFRAME)
+
+    pygame.event.set_blocked(pygame.MOUSEMOTION)  # keep our queue cleaner
+
+    while True:
+        event = pygame.event.wait()
+        if event.type in (pygame.QUIT, pygame.KEYDOWN, pygame.MOUSEBUTTONDOWN):
+            break
+        
+        
+        display_gradient(screen)
+        await asyncio.sleep(1)
+
+    pygame.quit()
+  
+main()
+  `)
+        }
+  
+        main()
+      </script>
+
+<div class="demo">
+    <div class="demo-header">pygame.examples.vgrade</div>
+    <div class="demo-content">
+        <canvas id="canvas"></canvas>
+    </div>
+</div>
+
+</body>
+</html>

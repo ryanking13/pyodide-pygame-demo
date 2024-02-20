@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Stars</title>
+    <title>Pyodide Pygame Example</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -40,9 +40,8 @@
 
     <script type="text/javascript">
         async function main(){
-          let pyodide = await loadPyodide({
-            packages: ["pygame-ce"],
-          });
+          let pyodide = await loadPyodide();
+          await pyodide.loadPackage(["pygame-ce"], { checkIntegrity: false })
 
           canvas = document.getElementById("canvas");
           pyodide.canvas.setCanvas2D(canvas);
@@ -435,12 +434,10 @@ async def main(winstyle=0):
         pygame.display.update(dirty)
 
         # cap the framerate at 40fps. Also called 40HZ or 40 times per second.
-        clock.tick(40)
+        await asyncio.sleep(0.025)
 
     if pygame.mixer:
         pygame.mixer.music.fadeout(1000)
-    pygame.time.wait(1000)
-    await asyncio.sleep(0)
 
 main()
   `)
