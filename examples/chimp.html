@@ -40,9 +40,8 @@
 
     <script type="text/javascript">
         async function main(){
-          let pyodide = await loadPyodide({
-            packages: ["pygame-ce"],
-          });
+          let pyodide = await loadPyodide();
+          await pyodide.loadPackage(["pygame-ce"], { checkIntegrity: false })
 
           canvas = document.getElementById("canvas");
           pyodide.canvas.setCanvas2D(canvas);
