@@ -1,4 +1,4 @@
-Metadata-Version: 2.1
+Metadata-Version: 2.3
 Name: cramjam
 Version: 2.8.1
 Requires-Dist: black ==22.3.0 ; extra == 'dev'
