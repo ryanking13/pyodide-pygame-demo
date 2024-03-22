@@ -46,7 +46,7 @@
           canvas = document.getElementById("canvas");
           pyodide.canvas.setCanvas2D(canvas);
 
-          let zipResponse = await fetch("http://localhost:8000/gamejam/CaffeineFueled.zip");
+          let zipResponse = await fetch("https://ryanking13.github.io/pyodide-pygame-demo/gamejam/CaffeineFueled.zip");
           let zipBinary = await zipResponse.arrayBuffer();
           pyodide.unpackArchive(zipBinary, "zip", { extractDir: "/lib/python3.12/site-packages/caffeinefueled" });
           
