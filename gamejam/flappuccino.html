@@ -48,7 +48,7 @@
 
           let zipResponse = await fetch("https://ryanking13.github.io/pyodide-pygame-demo/gamejam/Flappuccino.zip");
           let zipBinary = await zipResponse.arrayBuffer();
-          pyodide.unpackArchive(zipBinary, "zip", { extractDir: "/lib/python3.12/site-packages/flappuccino" });
+          pyodide.unpackArchive(zipBinary, "zip", { extractDir: "/lib/python3.13/site-packages/flappuccino" });
           
           pyodide.runPythonAsync(`
 import flappuccino.main
